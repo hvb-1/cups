@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>3 Cups</title>
+        <meta name = "viewport" content = "width = device-width, initial-scale =
+            1.0, maximum-scale = 1.0, minimum-scale = 1.0, user-scalable = 0, minimal-ui" />
+        <style type = "text/css">
+            #phaser_game{
+                padding: 0px;
+                margin: 0px;
+                background: gray;
+            }
+            #preload{
+                color: greenyellow;
+                text-align:center;
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                
+            }
+            canvas{
+				display:block;
+				z-index: 99;					
+				-webkit-text-stroke: 0.5px black;
+				background: black;
+            }
+		
+        </style>
+
+        <meta charset="utf-8">
+        <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, width=device-width, user-scalable=no, minimal-ui">
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="full-screen" content="yes" />
+        <meta name="screen-orientation" content="landscape" />
+        <script type="text/javascript">
+            var assets_version = 'v1';
+        </script>       
+      
+<link rel="stylesheet" type = "text/css" href = "./assets/fonts/fontLoader1.css">
+<script type="text/javascript" src="./external/phaser.min.3.60.0.js"></script>
+<script type="text/javascript" src="./boot.js?1" defer></script>
+
+
+    </head>
+    <body>
+            <div class="font_preload">
+                    <span style="font-family: font1;"></span>
+                   
+            </div>
+            
+            <div id="preload">
+                    <H1> LOADING... </H1>
+                    
+            </div>
+            <div id="phaser_game">
+                     
+            </div>
+            
+    </body>
+</html>
