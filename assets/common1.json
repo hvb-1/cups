@@ -1,0 +1,43 @@
+﻿{"frames": {
+
+"ball":
+{
+	"frame": {"x":1,"y":357,"w":120,"h":120},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":120,"h":120},
+	"sourceSize": {"w":120,"h":120}
+},
+"ball_score":
+{
+	"frame": {"x":122,"y":357,"w":90,"h":91},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":90,"h":91},
+	"sourceSize": {"w":90,"h":91}
+},
+"cup_main":
+{
+	"frame": {"x":1,"y":179,"w":150,"h":177},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":150,"h":177},
+	"sourceSize": {"w":150,"h":177}
+},
+"cup_over":
+{
+	"frame": {"x":1,"y":1,"w":150,"h":177},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":150,"h":177},
+	"sourceSize": {"w":150,"h":177}
+}},
+"meta": {
+	"app": "Adobe Animate",
+	"version": "18.0.2.126",
+	"image": "common1.png",
+	"format": "RGBA8888",
+	"size": {"w":256,"h":512},
+	"scale": "1"
+}
+}

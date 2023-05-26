@@ -69,7 +69,7 @@ class mainGame extends Phaser.Scene{
 		// }
 
 
-		// loader.atlas("common1", "assets/common1" + min_suff + ".png" + '?' + assets_version, "assets/common1.json" + '?' + assets_version);
+		loader.atlas("common1", "assets/common1" + ".png" + '?' + assets_version, "assets/common1.json" + '?' + assets_version);
 		loader.atlas("flares", "assets/flares.png" + '?' + assets_version, "assets/flares.json" + '?' + assets_version);
 		loader.image('orientation_notifier', 'assets/orientation_notifier.png');
 		loader.image('main_bg', 'assets/bg.jpg');
@@ -81,6 +81,8 @@ class mainGame extends Phaser.Scene{
 			loader.script('main_game', "js/game.js");
 			loader.script('config', "js/config.js");
 			loader.script('utils', "js/utils.js");
+			loader.script('game_cup', "js/game_cup.js");
+			loader.script('game_engine', "js/game_engine.js");
 			// loader.script('audio_manager', "game_utilities/audio_manager.js");
 			// loader.script('game_utils', "game_utilities/game_utils.js");
 			// loader.script('custom_button', "game_utilities/custom_button.js");
