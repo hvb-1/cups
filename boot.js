@@ -13,7 +13,7 @@ const boot_data = {
 	'H': 720,
 }
 const is_localhost = (location.hostname == '127.0.0.1' || location.hostname == 'localhost')
-
+let user_data = {};
 
 window.onload = function() {
 	var elem = document.getElementById('preload');

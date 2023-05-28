@@ -40,6 +40,14 @@
 	"spriteSourceSize": {"x":0,"y":0,"w":70,"h":74},
 	"sourceSize": {"w":70,"h":74}
 },
+"coin":
+{
+	"frame": {"x":454,"y":76,"w":50,"h":51},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":50,"h":51},
+	"sourceSize": {"w":50,"h":51}
+},
 "cup_main":
 {
 	"frame": {"x":152,"y":1,"w":150,"h":177},
@@ -58,7 +66,7 @@
 },
 "icon_full_off":
 {
-	"frame": {"x":454,"y":127,"w":50,"h":50},
+	"frame": {"x":457,"y":179,"w":50,"h":50},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":50,"h":50},
@@ -66,7 +74,7 @@
 },
 "icon_full_on":
 {
-	"frame": {"x":454,"y":76,"w":50,"h":50},
+	"frame": {"x":454,"y":128,"w":50,"h":50},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":50,"h":50},
