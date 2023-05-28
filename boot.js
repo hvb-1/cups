@@ -57,16 +57,10 @@ class mainGame extends Phaser.Scene{
 		let loader = new Phaser.Loader.LoaderPlugin(this);
 		
 		boot_data['audio_library'] = {};
-		let preload_sounds = [];
-		// var preload_sounds = ['start_cards', 'coin_fly_add', 'wrong_click', 'get_star', 'break_pig', 'button_over', 'button_click', 'ice', 'correct_card',
-		// 	'open_card', 'wrong_card', 'appear_pimp', 'level_complete', 'complete_window', 'bonus_use_undo', 'lock_open',
-		// 	'level_cards_start', 'start_coin', 'coin_pig_finish', 'sequence_bonus', 'treasure_add', 'add_treasure_coins', 'prebooster_joker',
-		// 	'5_cards_add', 'bonus_3cards', 'add_card', 'preb_streak', 'cards_appear', 'wrong_secret', 'arrow', 'target',
-		// 	'combo1', 'combo2', 'combo3', 'combo4', 'combo5', 'combo6', 'combo7', 'combo8'
-		// ]
-		// for (let i = 0; i < preload_sounds.length; i++) {
-		// 	loader.audio(preload_sounds[i], 'assets/audio/' + preload_sounds[i] + '.mp3');
-		// }
+		let preload_sounds = ['button_click', 'button_over', 'init_box', 'next_round', 'round_fail', 'round_win', 'woosh', 'opt_woosh'];
+		for (let sound_name of preload_sounds) {
+			loader.audio(sound_name, 'assets/audio/' + sound_name + '.mp3');
+		}
 
 
 		loader.atlas("common1", "assets/common1" + ".png" + '?' + assets_version, "assets/common1.json" + '?' + assets_version);
@@ -83,7 +77,8 @@ class mainGame extends Phaser.Scene{
 			loader.script('utils', "js/utils.js");
 			loader.script('game_cup', "js/game_cup.js");
 			loader.script('game_engine', "js/game_engine.js");
-			// loader.script('audio_manager', "game_utilities/audio_manager.js");
+			loader.script('action_manager', "js/action_manager.js");
+			loader.script('custom_button', "js/custom_button.js");
 			// loader.script('game_utils', "game_utilities/game_utils.js");
 			// loader.script('custom_button', "game_utilities/custom_button.js");
 		
@@ -100,12 +95,11 @@ class mainGame extends Phaser.Scene{
 		});
 		loader.once('complete', ()=> {
 			this.set_loading_progress(100);
-			for (let i = 0; i < preload_sounds.length; i++) {
-				var sound_name = preload_sounds[i];
+			for (let sound_name of preload_sounds) {
 				if (this.cache.audio.exists(sound_name)) {
 					var sound = this.sound.add(sound_name);
-					loading_vars['audio_library'][sound_name] = {};
-					loading_vars['audio_library'][sound_name]['sound'] = sound;
+					boot_data['audio_library'][sound_name] = {};
+					boot_data['audio_library'][sound_name]['sound'] = sound;
 					sound.stop();
 				}
 			}

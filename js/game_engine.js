@@ -26,20 +26,44 @@ var GameEngine = new Phaser.Class({
 		this.holder = new Phaser.GameObjects.Container(this.scene, 0, 0);
 		this.add(this.holder);
 
+		this.action_manager = new ActionManager();
+		this.action_manager.alpha = 0;
+		this.add(this.action_manager);
+
 		for (let i = 0; i < config['cups_pos'].length; i++) {
-			let cup = new GameCup(i);
+			let cup = new GameCup(i, this.anim_holder);
+			cup.visible = false;
 			cup.emitter.on('EVENT', this.handler_event, this);
 			this.cups.push(cup);
 			this.holder.add(cup);
 		}
-
-		this.place_cups(true);
 
 		this.overlay = new Phaser.GameObjects.Image(this.scene, 0, 0,'dark_overlay');
 		this.add(this.overlay);
 		this.overlay.alpha = 0.01;
 		this.overlay.setInteractive();
 		this.overlay.visible = false;
+
+		
+		setTimeout(() => {
+			this.init_show();
+		}, 300);
+		
+	},
+
+	init_show() {
+		this.place_cups(true);
+		for (let i = 0; i < this.cups.length; i++) {
+			let cup = this.cups[i];
+			cup.dy = cup.y;
+			cup.y = 500 * (Math.random() > 0.5 ? 1 : -1);
+			cup.visible = true;
+			let delay = 100 + i * 300;
+			utils.play_sound('init_box', delay);
+			this.scene.tweens.add({targets: cup, y: cup.dy, delay: delay, duration: 600, ease: 'Back.easeOut'});
+		}
+		this.scene.tweens.add({targets: this.action_manager, alpha: 1, delay: 700, duration: 300});
+		
 	},
 
 	place_cups(quick = false, shuffle_times = 0, on_complete = null) {
@@ -59,7 +83,12 @@ var GameEngine = new Phaser.Class({
 			//console.log('anim_starts', shuffle_times)
 			this.anim_all_cups(cups_pos, ()=>{
 				shuffle_times -= 1;
-				if (shuffle_times == 0 && on_complete) on_complete();
+				if (shuffle_times == 1) this.action_manager.prepare_next_round();
+				
+				if (shuffle_times == 0 && on_complete) {
+					utils.play_sound('next_round');
+					on_complete();
+				}
 				else this.place_cups(quick, shuffle_times, on_complete);
 			})
 			//bringToTop(child)
@@ -125,6 +154,9 @@ var GameEngine = new Phaser.Class({
 				}, 20);
 			}
 		});
+		setTimeout(() => {
+			utils.play_sound('woosh');
+		}, delay);
 	},
 
 	get_new_pos(quick = false) {
@@ -151,7 +183,9 @@ var GameEngine = new Phaser.Class({
 		this.overlay.visible = true;
 		if (clicked_cup.ball) {
 			clicked_cup.cup_over_anim();
+			clicked_cup.fly_ball(this.action_manager.get_fly_ball_pt());
 			this.shuffle_next(clicked_cup, 300);
+			utils.play_sound('round_win');
 		}
 		else {
 			for (let cup of this.cups) {
@@ -163,8 +197,9 @@ var GameEngine = new Phaser.Class({
 					if (cup != clicked_cup) cup.move_down();
 				this.shuffle_next(clicked_cup);
 			}, 500);
+			utils.play_sound('round_fail');
 		}
-		
+		this.action_manager.round_result(clicked_cup.ball);
 	},
 
 	shuffle_next(cup, delay = 0) {
@@ -174,7 +209,7 @@ var GameEngine = new Phaser.Class({
 			this.place_cups(false, config.shuffle_times, ()=>{
 				this.overlay.visible = false;
 				//for (let cup of this.cups) cup.allow_click = true;
-			})
+			});
 		}, delay);
 	},
 

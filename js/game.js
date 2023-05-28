@@ -7,7 +7,7 @@ class Game {
 	prepare_game() {
 		utils = new Utils(this.scene);
 		utils.init();
-		//game_data['audio_manager'] = new AudioManager(game_data['scene']);
+		window.focus();
 		window.addEventListener("resize", ()=>{
 			utils.set_game_size();
 		});

@@ -4,13 +4,14 @@ var GameCup = new Phaser.Class({
 
 	initialize:
 
-	function GameCup(_no)
+	function GameCup(_no, _anim_holder)
 	{
 		this.scene = boot_data['scene'];
 		Phaser.GameObjects.Container.call(this, this.scene, 0, 0);
 		this.emitter = new Phaser.Events.EventEmitter();
 		this.no = _no;
 		this.current_pos = _no;
+		this.anim_holder = _anim_holder;
 		this.create_assets();
 	},
 
@@ -39,9 +40,10 @@ var GameCup = new Phaser.Class({
 			this.ball_shadow.postFX.addBlur(0, 0, 0, 2, 0x000000, 2);
 			this.add(this.ball_shadow);
 			this.add(this.ball);
-
-			this.ball_for_fly = new Phaser.GameObjects.Image(this.scene, 0, this.ball.y, 'common1', 'ball');
-			this.add(this.ball_for_fly);
+			this.fly_cont = new Phaser.GameObjects.Container(this.scene, this.ball.x, this.ball.y);
+			this.add(this.fly_cont);
+			this.ball_for_fly = new Phaser.GameObjects.Image(this.scene, 0, 0, 'common1', 'ball');
+			this.fly_cont.add(this.ball_for_fly);
 			this.ball_for_fly.visible = false;
 
 			this.tweenable_parts.push(this.ball_shadow);
@@ -92,14 +94,14 @@ var GameCup = new Phaser.Class({
 		let dur = 400;
 		this.is_up = true;
 		utils.stop_tweens(this.tweenable_parts);
-		if (this.tid_down) clearTimeout(this.tid_down);
+		//if (this.tid_down) clearTimeout(this.tid_down);
 
-		this.scene.tweens.add({targets: this.main_cup, y: -150, duration: dur, onComplete: ()=>{
+		this.scene.tweens.add({targets: this.main_cup, y: -140, duration: dur, onComplete: ()=>{
 			this.allow_click = true;
 			if (by_click) this.emitter.emit('EVENT', {'event': 'cup_click', 'instance': this});
-			this.tid_down = setTimeout(() => {
-				if (this.allow_click) this.move_down();
-			}, 5000);
+			// this.tid_down = setTimeout(() => {
+			// 	if (this.allow_click) this.move_down();
+			// }, 5000);
 		}});
 		this.scene.tweens.add({targets: this.shadow, 
 			y: this.shadow.dy + 60, 
@@ -116,7 +118,7 @@ var GameCup = new Phaser.Class({
 		let dur = 400;
 		this.is_up = false;
 		utils.stop_tweens(this.tweenable_parts);
-		if (this.tid_down) clearTimeout(this.tid_down);
+		//if (this.tid_down) clearTimeout(this.tid_down);
 
 		this.scene.tweens.add({targets: this.main_cup, y: 0, duration: dur, delay: delay, onComplete: ()=>{
 			this.allow_click = true;
@@ -135,11 +137,91 @@ var GameCup = new Phaser.Class({
 		}
 	},
 
-	
+	fly_ball(end_pt) {
+		
+		this.ball.visible = false;
+		let item = this.ball_for_fly;
+		let pt = utils.toGlobal(item);
+		this.anim_holder.add(item);
+		item.x = pt.x;
+		item.y = pt.y;
+		item.visible = true;
+		let dur = 1000;
 
-	// init(params) {
-	// 	this.create_assets()
-	// },
+		this.scene.tweens.add({targets: item, scale: 0.3, duration: dur, onComplete: ()=>{
+			this.scene.tweens.add({targets: item, alpha: 0, duration: 100, onComplete: ()=>{
+				item.x = 0;
+				item.y = 0;
+				item.scale = this.ball.scale;
+				item.visible = false;
+				item.alpha = 1;
+				this.fly_cont.add(item);
+				this.ball.visible = true;
+			}});
+		}});
 
-	
+
+		let colors = ['blue', 'green', 'yellow', 'white', 'red'];
+		let color = colors[parseInt(Math.random() * colors.length)];
+		let emit_zone = { 
+			type: 'edge', 
+			source: new Phaser.Geom.Circle(0, 0, item.displayWidth / 3), 
+			quantity: 30 
+		};
+		
+		let emitter = this.scene.add.particles(0, 0, 'flares', {
+			frame: color,
+			lifespan: 900,
+			frequency: 30,
+			quantity: 20,
+			follow: item,
+			emitZone: emit_zone,
+			speedX: {min: -50, max: 50},
+			speedY: {min: -210, max: 50},
+			scale: { start: 0.1, end:  0.4 },
+			alpha: {start: 1, end : 0.1},
+			blendMode: 'ADD',
+		});
+		this.anim_holder.add(emitter);
+		emitter.stop();
+		emitter.start();
+		
+
+		let points = [];
+		points.push(new Phaser.Math.Vector2(item.x, item.y)); 
+		points.push(new Phaser.Math.Vector2(item.x - 150, item.y + 150)); 
+		points.push(new Phaser.Math.Vector2(end_pt.x, end_pt.y)); 
+		let curve = new Phaser.Curves.Spline(points);
+		let tweenObject = { val: 0 };
+		
+		
+		this.scene.tweens.add({targets: tweenObject, val: 1, duration: dur, ease: 'Sine.easeOut',
+			onUpdate: (tween, target)=>{
+				var position = curve.getPoint(target.val);
+				item.x = position.x;
+				item.y = position.y;
+				// let emitzone = { 
+				// 	type: 'edge', 
+				// 	source: new Phaser.Geom.Circle(0, 0, item.displayWidth / 4), 
+				// 	quantity: 30 
+				// };
+				// console.log('qqq', item.displayWidth / 2)
+				// if (emitter) emitter.setEmitZone(emitzone);
+			},
+			onComplete: ()=>{
+				var position = curve.getPoint(1);
+				item.x = position.x;
+				item.y = position.y;
+				if (emitter) {
+			//		emitter.setEmitZone(emit_zone);
+					emitter.explode();
+					emitter.stop();
+					setTimeout(() => {
+						emitter.destroy();
+						emitter = null;
+					}, 900);
+				}
+			}
+		});
+	}
 });

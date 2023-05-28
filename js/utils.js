@@ -4,6 +4,9 @@ class Utils {
 	}
 
 	init() {
+		this.sound_unpaused = 1;
+		this.playing_sounds = [];
+		this.sound_id = 0;
 		this.create_overlay();
 	}
 
@@ -125,6 +128,74 @@ class Utils {
 
 	hide_orientation_notifier(cont) {
 		cont.visible = false;
+	}
+
+	switch_sound_volume() {
+		this.sound_unpaused = 1 - this.sound_unpaused;
+		this.update_volume();
+	}
+
+	update_volume() {
+		for (let sound_obj in this.playing_sounds.length) {
+			if (sound_obj['sound'].isPlaying) sound_obj['sound'].setVolume(this.sound_unpaused);
+		}
+	}
+
+	play_sound(sound_name, delay = 0) {
+		let sound = null;
+		var vol = this.sound_unpaused;
+		var config = {'volume':vol};
+		let sound_obj = boot_data['audio_library'][sound_name];
+		let in_library = sound_obj && 'sound' in sound_obj;
+		
+		if (in_library || this.scene.cache.audio.exists(sound_name)) {
+			if (in_library) sound = boot_data['audio_library'][sound_name]['sound'];
+			else sound = this.scene.sound.add(sound_name);
+			
+			if (sound) {
+				setTimeout(() => {
+					this.add_playing_sound(sound_name, sound, config);
+				}, delay);
+			}
+			
+		}
+		else if (navigator.onLine) {
+			var dir_url = './assets/audio/';
+			var loader = new Phaser.Loader.LoaderPlugin(this.scene);
+			loader.audio(sound_name, dir_url + sound_name + '.mp3');
+			loader.once('complete', ()=>{
+				if (this.scene.cache.audio.exists(sound_name)) {
+					sound = this.scene.sound.add(sound_name);
+					if (sound) {
+						boot_data['audio_library'][sound_name] = {};
+						boot_data['audio_library'][sound_name]['sound'] = sound;	
+						setTimeout(() => {
+							this.add_playing_sound(sound_name, sound, config);
+						}, delay);
+					}
+				}
+				loader.destroy();
+			});
+			loader.start();
+		}
+	}
+
+	add_playing_sound(sound_name, sound, config) {
+		this.sound_id++;
+		let sound_id = this.sound_id;
+		this.playing_sounds.push({
+			'sound': sound,
+			'sound_id': this.sound_id,
+			'sound_name': sound_name,
+		});
+		sound.play(config);
+		sound.once('stop', ()=>{
+			for (var i = 0; i < this.playing_sounds.length; i++)
+				if (this.playing_sounds[i]['sound_id'] == sound_id) {
+					this.playing_sounds.splice(i, 1);
+					break;
+				}
+		});	
 	}
 
 }
