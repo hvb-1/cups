@@ -94,14 +94,9 @@ var GameCup = new Phaser.Class({
 		let dur = 400;
 		this.is_up = true;
 		utils.stop_tweens(this.tweenable_parts);
-		//if (this.tid_down) clearTimeout(this.tid_down);
-
 		this.scene.tweens.add({targets: this.main_cup, y: -140, duration: dur, onComplete: ()=>{
 			this.allow_click = true;
 			if (by_click) this.emitter.emit('EVENT', {'event': 'cup_click', 'instance': this});
-			// this.tid_down = setTimeout(() => {
-			// 	if (this.allow_click) this.move_down();
-			// }, 5000);
 		}});
 		this.scene.tweens.add({targets: this.shadow, 
 			y: this.shadow.dy + 60, 
@@ -118,8 +113,6 @@ var GameCup = new Phaser.Class({
 		let dur = 400;
 		this.is_up = false;
 		utils.stop_tweens(this.tweenable_parts);
-		//if (this.tid_down) clearTimeout(this.tid_down);
-
 		this.scene.tweens.add({targets: this.main_cup, y: 0, duration: dur, delay: delay, onComplete: ()=>{
 			this.allow_click = true;
 			this.emitter.emit('EVENT', {'event': 'cup_down', 'instance': this});
@@ -137,8 +130,7 @@ var GameCup = new Phaser.Class({
 		}
 	},
 
-	fly_ball(end_pt) {
-		
+	fly_ball(end_pt) {	
 		this.ball.visible = false;
 		let item = this.ball_for_fly;
 		let pt = utils.toGlobal(item);
@@ -159,7 +151,6 @@ var GameCup = new Phaser.Class({
 				this.ball.visible = true;
 			}});
 		}});
-
 
 		let colors = ['blue', 'green', 'yellow', 'white', 'red'];
 		let color = colors[parseInt(Math.random() * colors.length)];
@@ -200,20 +191,12 @@ var GameCup = new Phaser.Class({
 				var position = curve.getPoint(target.val);
 				item.x = position.x;
 				item.y = position.y;
-				// let emitzone = { 
-				// 	type: 'edge', 
-				// 	source: new Phaser.Geom.Circle(0, 0, item.displayWidth / 4), 
-				// 	quantity: 30 
-				// };
-				// console.log('qqq', item.displayWidth / 2)
-				// if (emitter) emitter.setEmitZone(emitzone);
 			},
 			onComplete: ()=>{
 				var position = curve.getPoint(1);
 				item.x = position.x;
 				item.y = position.y;
 				if (emitter) {
-			//		emitter.setEmitZone(emit_zone);
 					emitter.explode();
 					emitter.stop();
 					setTimeout(() => {

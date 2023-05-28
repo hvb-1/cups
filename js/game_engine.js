@@ -16,17 +16,14 @@ var GameEngine = new Phaser.Class({
 		this.score = 0;
 		this.attempts = 0;
 		this.anim_holder = params['anim_holder'];
-		//fullscreen, sound btn
-
 		this.create_assets();
 	},
 
 	create_assets() {
-
 		this.holder = new Phaser.GameObjects.Container(this.scene, 0, 0);
 		this.add(this.holder);
 
-		this.action_manager = new ActionManager();
+		this.action_manager = new ActionManager(this.anim_holder);
 		this.action_manager.alpha = 0;
 		this.add(this.action_manager);
 
@@ -43,12 +40,10 @@ var GameEngine = new Phaser.Class({
 		this.overlay.alpha = 0.01;
 		this.overlay.setInteractive();
 		this.overlay.visible = false;
-
 		
 		setTimeout(() => {
 			this.init_show();
-		}, 300);
-		
+		}, 300);	
 	},
 
 	init_show() {
@@ -67,8 +62,6 @@ var GameEngine = new Phaser.Class({
 	},
 
 	place_cups(quick = false, shuffle_times = 0, on_complete = null) {
-		//let pos_copy = config['cups_pos'].slice();
-
 		let cups_pos = this.get_new_pos(quick);
 		if (quick) {
 			for (let i = 0; i < cups_pos.length; i++) {
@@ -80,7 +73,6 @@ var GameEngine = new Phaser.Class({
 			this.reorder_cup_layers();
 		}
 		else if (shuffle_times > 0){
-			//console.log('anim_starts', shuffle_times)
 			this.anim_all_cups(cups_pos, ()=>{
 				shuffle_times -= 1;
 				if (shuffle_times == 1) this.action_manager.prepare_next_round();
@@ -91,7 +83,6 @@ var GameEngine = new Phaser.Class({
 				}
 				else this.place_cups(quick, shuffle_times, on_complete);
 			})
-			//bringToTop(child)
 		}
 	},
 
@@ -104,7 +95,6 @@ var GameEngine = new Phaser.Class({
 		let first_anim = true;
 		for (let i = 0; i < cups.length; i++) {
 			let cup = cups[i];
-			//console.log('aac', i, cup.current_pos)
 			if (i != cup.current_pos) {
 				let new_pos = config['cups_pos'][i];
 				let points = [];
@@ -117,12 +107,9 @@ var GameEngine = new Phaser.Class({
 				}
 				points.push(new Phaser.Math.Vector2(new_pos.x, new_pos.y));
 				let curve = new Phaser.Curves.Spline(points);
-//console.log('aac2=', points.length)
 				let func = first_anim ? on_complete : null;
 				first_anim = false;
-				//let duration = Math.abs(cup.current_pos - i) > 1 ? 500 : 350
 				this.curve_anim(cup, curve, cup.current_pos == 1 ? 50 : 0, func);
-
 				cup.current_pos = i;
 			}
 		}
@@ -160,7 +147,7 @@ var GameEngine = new Phaser.Class({
 	},
 
 	get_new_pos(quick = false) {
-		let cups = this.cups// this.cups.slice();
+		let cups = this.cups;
 		let pos1 = parseInt(Math.random() * cups.length);
 		let cup = cups[pos1];
 		
@@ -169,7 +156,6 @@ var GameEngine = new Phaser.Class({
 		pos2 += pos1;
 		if (pos2 >= cups.length) pos2 -= cups.length;
 
-	//console.log('gnp', pos1, pos2)
 		cups[pos1] = cups[pos2]
 		cups[pos2] = cup;
 		this.cups = cups;
@@ -181,6 +167,7 @@ var GameEngine = new Phaser.Class({
 		if (this.previous_cup) this.previous_cup.move_down()
 		this.previous_cup = clicked_cup;
 		this.overlay.visible = true;
+		let will_reset = this.action_manager.round_result(clicked_cup.ball);
 		if (clicked_cup.ball) {
 			clicked_cup.cup_over_anim();
 			clicked_cup.fly_ball(this.action_manager.get_fly_ball_pt());
@@ -195,20 +182,18 @@ var GameEngine = new Phaser.Class({
 			setTimeout(() => {
 				for (let cup of this.cups)
 					if (cup != clicked_cup) cup.move_down();
-				this.shuffle_next(clicked_cup);
+				this.shuffle_next(clicked_cup, 0, will_reset);
 			}, 500);
 			utils.play_sound('round_fail');
 		}
-		this.action_manager.round_result(clicked_cup.ball);
 	},
 
-	shuffle_next(cup, delay = 0) {
+	shuffle_next(cup, delay = 0, will_reset = false) {
 		cup.move_down(()=> {
-			//for (let cup of this.cups) cup.allow_click = false;
 			if (cup.ball) this.place_cups(true);
-			this.place_cups(false, config.shuffle_times, ()=>{
+			let total_shuffles = will_reset ? Math.ceil(config.shuffle_times / 4) : config.shuffle_times;
+			this.place_cups(false, total_shuffles, ()=>{
 				this.overlay.visible = false;
-				//for (let cup of this.cups) cup.allow_click = true;
 			});
 		}, delay);
 	},
@@ -227,5 +212,9 @@ var GameEngine = new Phaser.Class({
 				break;
 		}
 	},
+
+	reset_game() {
+		this.action_manager.reset_game();
+	}
 	
 });

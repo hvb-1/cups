@@ -1,13 +1,15 @@
 class Utils {
 	constructor(_scene){
         this.scene = _scene;
+		this.emitter = new Phaser.Events.EventEmitter();
 	}
 
 	init() {
-		this.sound_unpaused = 1;
+		this.sound_unpaused = user_data.sound;
 		this.playing_sounds = [];
 		this.sound_id = 0;
 		this.create_overlay();
+		if (user_data.money <= 0) this.reset_game();
 	}
 
     set_game_size() {
@@ -132,7 +134,9 @@ class Utils {
 
 	switch_sound_volume() {
 		this.sound_unpaused = 1 - this.sound_unpaused;
+		user_data.sound = this.sound_unpaused;
 		this.update_volume();
+		this.save_user_data();
 	}
 
 	update_volume() {
@@ -197,5 +201,64 @@ class Utils {
 				}
 		});	
 	}
+
+	save_user_data() {
+		if (config['use_local_storage']) {
+			localStorage.setItem(boot_data['game_id'], JSON.stringify(user_data));
+		}
+	}
+
+	reset_game() {
+		user_data.money = init_user_data.money;
+		user_data.current_bet = init_user_data.current_bet;
+		user_data.attempts = 0;
+		user_data.wins = 0;
+		this.emitter.emit('EVENT', {'event': 'reset_game'});
+	}
+
+	fly_items_collect(params, on_complete) {
+		let amount = params['amount'];
+		let delay = 30;			
+
+		for (let i = 0; i < amount; i++) {
+			let func = (i == amount - 1) ? on_complete : null;
+			this.show_moving_item_collect(params, delay * i, func);
+		}
+	}
+
+	get_collect_pt_mid(pt) {
+		let angle_min = 220;
+		let angle_max = 350;
+		let angle = parseInt(Math.random() * (angle_max - angle_min) + angle_min)
+		let dist_min = 50;
+		let dist_max = 150;
+		let dist = parseInt(Math.random() * (dist_max - dist_min) + dist_min)
+		let pt_mid = new Phaser.Geom.Point(pt.x + Math.cos(Math.PI / 180 * angle) * dist, pt.y + Math.sin(Math.PI / 180 * angle) * dist);
+		return pt_mid;
+	}
+
+	show_moving_item_collect(params, delay, on_complete = null) {
+		let delay2 = 60 + parseInt(Math.random() * 40);
+		let item_atlas = params['item_atlas'];
+		let item_name = params['item_name'];
+		let holder = params['holder'];
+		let pt_start = this.toLocal(holder, params['pt_start']);
+		let pt_end = this.toLocal(holder, params['pt_end']);
+
+		let item = new Phaser.GameObjects.Image(this.scene, 0, 0, item_atlas, item_name);
+		item.x = pt_start.x;
+		item.y = pt_start.y;
+		if (holder && holder.scene) {
+			holder.add(item);
+			let pt_mid = this.get_collect_pt_mid(pt_start);
+			this.scene.tweens.add({targets: item, delay: delay, ease: "Sine.easeOut", x: pt_mid.x, y: pt_mid.y, duration: 150, onComplete: ()=>{
+				this.scene.tweens.add({targets: item, delay: delay2, ease: "Sine.easeInOut", x: pt_end.x, y: pt_end.y, duration: 500, onComplete: ()=>{
+					item.destroy();
+					if (on_complete) on_complete();
+				}});
+			}});
+
+		}		
+}
 
 }

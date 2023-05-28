@@ -7,8 +7,9 @@ var game = null;
 var utils = null;
 const landscape = true;
 const boot_data = {
+	'game_id': 'test_cups_app',
 	'scene': null,
-	'merged_js': false,
+	'merged_js': true,
 	'W': 1280,
 	'H': 720,
 }
@@ -49,7 +50,6 @@ class mainGame extends Phaser.Scene{
 		this.load.image('preload_bar', 'assets/preload_bar.png');
 		this.load.image('preload_bg', 'assets/preload_bg.png');
 		this.load.image('preload_bg2', 'assets/preload_bg2.png');
-
 		this.load.once('complete', this.preload_files, this);
 	}
 
@@ -61,7 +61,6 @@ class mainGame extends Phaser.Scene{
 		for (let sound_name of preload_sounds) {
 			loader.audio(sound_name, 'assets/audio/' + sound_name + '.mp3');
 		}
-
 
 		loader.atlas("common1", "assets/common1" + ".png" + '?' + assets_version, "assets/common1.json" + '?' + assets_version);
 		loader.atlas("flares", "assets/flares.png" + '?' + assets_version, "assets/flares.json" + '?' + assets_version);
@@ -79,11 +78,7 @@ class mainGame extends Phaser.Scene{
 			loader.script('game_engine', "js/game_engine.js");
 			loader.script('action_manager', "js/action_manager.js");
 			loader.script('custom_button', "js/custom_button.js");
-			// loader.script('game_utils', "game_utilities/game_utils.js");
-			// loader.script('custom_button', "game_utilities/custom_button.js");
-		
 		}
-
 
 		loader.on('progress', (value)=> {
 			if (Math.round(value * 100) == 100) {
@@ -107,7 +102,6 @@ class mainGame extends Phaser.Scene{
 			loader.destroy();
 		});
 		loader.start();
-
 	}
 
 	set_loading_progress(val) {
@@ -142,7 +136,7 @@ class mainGame extends Phaser.Scene{
 	}
 
 	update(){
-		//if (game) game.update();
+		
 	}
 }
 
