@@ -1,7 +1,3 @@
-/*
-
-*/
-
 var phaser_game;
 var game = null;
 var utils = null;
@@ -13,7 +9,6 @@ const boot_data = {
 	'W': 1280,
 	'H': 720,
 }
-const is_localhost = (location.hostname == '127.0.0.1' || location.hostname == 'localhost')
 let user_data = {};
 
 window.onload = function() {
@@ -53,9 +48,8 @@ class mainGame extends Phaser.Scene{
 		this.load.once('complete', this.preload_files, this);
 	}
 
-	preload_files(on_complete){
-		let loader = new Phaser.Loader.LoaderPlugin(this);
-		
+	preload_files(){
+		let loader = new Phaser.Loader.LoaderPlugin(this);		
 		boot_data['audio_library'] = {};
 		let preload_sounds = ['button_click', 'button_over', 'init_box', 'next_round', 'round_fail', 'round_win', 'woosh', 'opt_woosh'];
 		for (let sound_name of preload_sounds) {

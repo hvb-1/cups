@@ -120,6 +120,7 @@ var ActionManager = new Phaser.Class({
 		this.scene.tweens.add({targets: txt, scale: 1.2, duration: 200, delay: delay, onComplete: ()=>{
 			txt.text = String(user_data.money);
 			this.scene.tweens.add({targets: txt, scale: 1, duration: 200});
+			//delayed game reset to be sure player see what happens
 			if (user_data.money <= 0) this.show_reset_game();
 		}});
 	},
@@ -134,6 +135,7 @@ var ActionManager = new Phaser.Class({
 		arrow.setOrigin(0.5,0.85);
 		cont.add(arrow);
 		cont.arrow = arrow;
+		//arrow related up to 80% win-rate, not 100% because for more fun max angle should be reachable 
 		cont.min_rate = 0;
 		cont.max_rate = 0.8;
 		cont.min_angle = -80;
@@ -143,7 +145,7 @@ var ActionManager = new Phaser.Class({
 
 	round_result(is_win, is_init = false) {
 		let cont = this.win_rate_panel;
-		if (!is_init) {
+		if (!is_init) {//refactoring needed
 			this.attempts += 1;
 			if (is_win) {
 				this.wins += 1;
@@ -181,8 +183,7 @@ var ActionManager = new Phaser.Class({
 
 	prepare_next_round() {
 		this.scene.tweens.add({targets: this.top_header_wait, alpha: 0, duration: 300});
-		this.scene.tweens.add({targets: this.top_header_active, alpha: 1, duration: 300, delay: 200});
-		
+		this.scene.tweens.add({targets: this.top_header_active, alpha: 1, duration: 300, delay: 200});	
 	},
 
 	get_fly_ball_pt() {
@@ -205,6 +206,7 @@ var ActionManager = new Phaser.Class({
 	},
 
 	opt_btn_anim(btn, buttons_showed, new_pos, dur, reset_flag) {
+		//options buttons slide up and down, reset_flag - true for last button
 		if (buttons_showed) {
 			this.scene.tweens.add({targets: btn, alpha: 0, duration: 50, delay: dur - 50});
 			this.scene.tweens.add({targets: btn, y: new_pos, duration: dur, ease: 'Back.easeIn', onComplete: ()=> {
@@ -237,7 +239,7 @@ var ActionManager = new Phaser.Class({
 			this.scene.scale.startFullscreen();
 		}
 		utils.save_user_data();
-		setTimeout(() => {
+		setTimeout(() => {//some devices needs this delayed refresh
 			this.scene.scale.refresh();
 		}, 500);
 	},
@@ -282,7 +284,7 @@ var ActionManager = new Phaser.Class({
 		this.win_icon = new Phaser.GameObjects.Image(this.scene, 390, 1, 'common1', 'coin');
 		this.win_icon.scale = 0.8;
 		cont.add(this.win_icon);
-
+		//init update with last user bet
 		this.update_bet_buttons(user_data.current_bet);
 	},
 
@@ -310,6 +312,7 @@ var ActionManager = new Phaser.Class({
 	},
 
 	update_bet_buttons(_bet_size) {
+		//choose smallest bet in case user lacks of money for previously choosen bet after failed round
 		let bet_size = _bet_size > user_data.money ? config.bets[0] : _bet_size;
 		this.current_bet = bet_size;
 		for (let btn of this.bet_buttons) {
@@ -377,6 +380,7 @@ var ActionManager = new Phaser.Class({
 			dark.alpha = 0.7;
 			cont.add(dark);
 
+			//====== this windowed dialogue forced when player loose all money
 			cont.casino = new Phaser.GameObjects.Container(this.scene, 0, 0);
 			cont.add(cont.casino);
 
@@ -390,6 +394,7 @@ var ActionManager = new Phaser.Class({
 			txt.setOrigin(0.5);
 			cont.reset1.add(txt);
 
+			//====== this windowed dialogue forced when player click Restart button
 			cont.user_choice = new Phaser.GameObjects.Container(this.scene, 0, 0);
 			cont.add(cont.user_choice);
 

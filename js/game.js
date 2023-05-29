@@ -4,6 +4,7 @@ class Game {
 	}
 
 	prepare_game() {
+		//load saved data
 		user_data = Object.assign({}, init_user_data);
 		if (!config['reset_user_data'] && config['use_local_storage']) {
 			let stored_data = localStorage.getItem(boot_data['game_id']);
@@ -33,7 +34,8 @@ class Game {
 		this.scene.add.existing(this.anim_holder);
 
 		this.game_engine.init({'anim_holder': this.anim_holder});
-		if (this.delayed_reset_game) {
+		//delayed reset on start when no money and game not created
+		if (this.delayed_reset_game) { 
 			this.game_engine.reset_game(this.delayed_reset_game);
 			this.delayed_reset_game = null;
 		}

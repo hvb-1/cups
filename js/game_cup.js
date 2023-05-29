@@ -31,7 +31,7 @@ var GameCup = new Phaser.Class({
 		this.add(this.shadow);
 		this.tweenable_parts.push(this.shadow);
 
-		if (this.no == 0) {
+		if (this.no == 0) {//only first inited cup contains ball, let it be forever
 			this.ball = new Phaser.GameObjects.Image(this.scene, 0, 10, 'common1', 'ball');
 			this.ball_shadow = new Phaser.GameObjects.Image(this.scene, 0, 65, 'common1', 'ball');
 			this.ball_shadow.setScale(1, 0.2);
@@ -40,6 +40,7 @@ var GameCup = new Phaser.Class({
 			this.ball_shadow.postFX.addBlur(0, 0, 0, 2, 0x000000, 2);
 			this.add(this.ball_shadow);
 			this.add(this.ball);
+			//ball copy will fly if player win, for more simple layers logic
 			this.fly_cont = new Phaser.GameObjects.Container(this.scene, this.ball.x, this.ball.y);
 			this.add(this.fly_cont);
 			this.ball_for_fly = new Phaser.GameObjects.Image(this.scene, 0, 0, 'common1', 'ball');
@@ -151,7 +152,7 @@ var GameCup = new Phaser.Class({
 				this.ball.visible = true;
 			}});
 		}});
-
+		//randomize parcticle frame
 		let colors = ['blue', 'green', 'yellow', 'white', 'red'];
 		let color = colors[parseInt(Math.random() * colors.length)];
 		let emit_zone = { 
@@ -180,7 +181,7 @@ var GameCup = new Phaser.Class({
 
 		let points = [];
 		points.push(new Phaser.Math.Vector2(item.x, item.y)); 
-		points.push(new Phaser.Math.Vector2(item.x - 150, item.y + 150)); 
+		points.push(new Phaser.Math.Vector2(item.x - 140, item.y + 140)); 
 		points.push(new Phaser.Math.Vector2(end_pt.x, end_pt.y)); 
 		let curve = new Phaser.Curves.Spline(points);
 		let tweenObject = { val: 0 };

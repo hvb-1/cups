@@ -23,6 +23,7 @@ var GameEngine = new Phaser.Class({
 		this.holder = new Phaser.GameObjects.Container(this.scene, 0, 0);
 		this.add(this.holder);
 
+		//stats overlay, options, bets
 		this.action_manager = new ActionManager(this.anim_holder);
 		this.action_manager.alpha = 0;
 		this.add(this.action_manager);
@@ -34,7 +35,7 @@ var GameEngine = new Phaser.Class({
 			this.cups.push(cup);
 			this.holder.add(cup);
 		}
-
+		//game locking while shuffle
 		this.overlay = new Phaser.GameObjects.Image(this.scene, 0, 0,'dark_overlay');
 		this.add(this.overlay);
 		this.overlay.alpha = 0.01;
@@ -99,6 +100,7 @@ var GameEngine = new Phaser.Class({
 				let new_pos = config['cups_pos'][i];
 				let points = [];
 				points.push(new Phaser.Math.Vector2(cup.x, cup.y)); 
+				//simple 2-points movement for middle cup
 				if (cup.current_pos == 0) {
 					points.push(new Phaser.Math.Vector2(new_pos.x + 100, new_pos.y - 70));
 				}
@@ -127,6 +129,7 @@ var GameEngine = new Phaser.Class({
 				var position = curve.getPoint(target.val);
 				item.x = position.x;
 				item.y = position.y;
+				//pseudo 3d needs
 				if (reorder && target.val >= 0.5) {
 					reorder = false;
 					this.reorder_cup_layers();
@@ -141,11 +144,10 @@ var GameEngine = new Phaser.Class({
 				}, 20);
 			}
 		});
-		setTimeout(() => {
-			utils.play_sound('woosh');
-		}, delay);
+		utils.play_sound('woosh', delay);
 	},
 
+	//new positions after shuffle
 	get_new_pos(quick = false) {
 		let cups = this.cups;
 		let pos1 = parseInt(Math.random() * cups.length);
@@ -167,7 +169,7 @@ var GameEngine = new Phaser.Class({
 		if (this.previous_cup) this.previous_cup.move_down()
 		this.previous_cup = clicked_cup;
 		this.overlay.visible = true;
-		let will_reset = this.action_manager.round_result(clicked_cup.ball);
+		let will_reset = this.action_manager.round_result(clicked_cup.ball); //if returns true - zero money(casino wins) case
 		if (clicked_cup.ball) {
 			clicked_cup.cup_over_anim();
 			clicked_cup.fly_ball(this.action_manager.get_fly_ball_pt());
@@ -175,6 +177,7 @@ var GameEngine = new Phaser.Class({
 			utils.play_sound('round_win');
 		}
 		else {
+			//shows where is the ball before shuffle
 			for (let cup of this.cups) {
 				cup.cup_over_anim();
 				if (!cup.is_up) cup.move_up();
@@ -190,7 +193,8 @@ var GameEngine = new Phaser.Class({
 
 	shuffle_next(cup, delay = 0, will_reset = false) {
 		cup.move_down(()=> {
-			if (cup.ball) this.place_cups(true);
+			if (cup.ball) this.place_cups(true); //quick ball placing if player win last round
+			//just couple shuffles because of reset window appears
 			let total_shuffles = will_reset ? Math.ceil(config.shuffle_times / 4) : config.shuffle_times;
 			this.place_cups(false, total_shuffles, ()=>{
 				this.overlay.visible = false;

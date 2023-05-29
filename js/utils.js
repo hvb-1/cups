@@ -92,6 +92,7 @@ class Utils {
 	add_orientation_notifier() {
 		if (this.scene.sys.game.device.os.desktop) {}
 		else {
+			//appears at mobile devices in portrait position
 			let cont = new Phaser.GameObjects.Container(this.scene, 0, 0);
 			this.scene.add.existing(cont);
 			this.orientation_notifier = cont;
@@ -144,7 +145,7 @@ class Utils {
 			if (sound_obj['sound'].isPlaying) sound_obj['sound'].setVolume(this.sound_unpaused);
 		}
 	}
-
+	//part of audio manager, extendable for for different audio kind and types, ex.: music, ambience
 	play_sound(sound_name, delay = 0) {
 		let sound = null;
 		var vol = this.sound_unpaused;
@@ -216,6 +217,7 @@ class Utils {
 		this.emitter.emit('EVENT', {'event': 'reset_game'});
 	}
 
+	//for prize claiming anims
 	fly_items_collect(params, on_complete) {
 		let amount = params['amount'];
 		let delay = 30;			

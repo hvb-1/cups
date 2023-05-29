@@ -126,6 +126,7 @@ var ActionManager = new Phaser.Class({
 		this.scene.tweens.add({targets: txt, scale: 1.2, duration: 200, delay: delay, onComplete: ()=>{
 			txt.text = String(user_data.money);
 			this.scene.tweens.add({targets: txt, scale: 1, duration: 200});
+			//delayed game reset to be sure player see what happens
 			if (user_data.money <= 0) this.show_reset_game();
 		}});
 	},
@@ -140,6 +141,7 @@ var ActionManager = new Phaser.Class({
 		arrow.setOrigin(0.5,0.85);
 		cont.add(arrow);
 		cont.arrow = arrow;
+		//arrow related up to 80% win-rate, not 100% because for more fun max angle should be reachable 
 		cont.min_rate = 0;
 		cont.max_rate = 0.8;
 		cont.min_angle = -80;
@@ -149,7 +151,7 @@ var ActionManager = new Phaser.Class({
 
 	round_result(is_win, is_init = false) {
 		let cont = this.win_rate_panel;
-		if (!is_init) {
+		if (!is_init) {//refactoring needed
 			this.attempts += 1;
 			if (is_win) {
 				this.wins += 1;
@@ -187,8 +189,7 @@ var ActionManager = new Phaser.Class({
 
 	prepare_next_round() {
 		this.scene.tweens.add({targets: this.top_header_wait, alpha: 0, duration: 300});
-		this.scene.tweens.add({targets: this.top_header_active, alpha: 1, duration: 300, delay: 200});
-		
+		this.scene.tweens.add({targets: this.top_header_active, alpha: 1, duration: 300, delay: 200});	
 	},
 
 	get_fly_ball_pt() {
@@ -211,6 +212,7 @@ var ActionManager = new Phaser.Class({
 	},
 
 	opt_btn_anim(btn, buttons_showed, new_pos, dur, reset_flag) {
+		//options buttons slide up and down, reset_flag - true for last button
 		if (buttons_showed) {
 			this.scene.tweens.add({targets: btn, alpha: 0, duration: 50, delay: dur - 50});
 			this.scene.tweens.add({targets: btn, y: new_pos, duration: dur, ease: 'Back.easeIn', onComplete: ()=> {
@@ -243,7 +245,7 @@ var ActionManager = new Phaser.Class({
 			this.scene.scale.startFullscreen();
 		}
 		utils.save_user_data();
-		setTimeout(() => {
+		setTimeout(() => {//some devices needs this delayed refresh
 			this.scene.scale.refresh();
 		}, 500);
 	},
@@ -288,7 +290,7 @@ var ActionManager = new Phaser.Class({
 		this.win_icon = new Phaser.GameObjects.Image(this.scene, 390, 1, 'common1', 'coin');
 		this.win_icon.scale = 0.8;
 		cont.add(this.win_icon);
-
+		//init update with last user bet
 		this.update_bet_buttons(user_data.current_bet);
 	},
 
@@ -316,6 +318,7 @@ var ActionManager = new Phaser.Class({
 	},
 
 	update_bet_buttons(_bet_size) {
+		//choose smallest bet in case user lacks of money for previously choosen bet after failed round
 		let bet_size = _bet_size > user_data.money ? config.bets[0] : _bet_size;
 		this.current_bet = bet_size;
 		for (let btn of this.bet_buttons) {
@@ -383,6 +386,7 @@ var ActionManager = new Phaser.Class({
 			dark.alpha = 0.7;
 			cont.add(dark);
 
+			//====== this windowed dialogue forced when player loose all money
 			cont.casino = new Phaser.GameObjects.Container(this.scene, 0, 0);
 			cont.add(cont.casino);
 
@@ -396,6 +400,7 @@ var ActionManager = new Phaser.Class({
 			txt.setOrigin(0.5);
 			cont.reset1.add(txt);
 
+			//====== this windowed dialogue forced when player click Restart button
 			cont.user_choice = new Phaser.GameObjects.Container(this.scene, 0, 0);
 			cont.add(cont.user_choice);
 
@@ -456,7 +461,7 @@ var ActionManager = new Phaser.Class({
 ﻿
 const config = {
 	'cups_pos': [{x: -120, y: -70}, {x: 0, y: 10}, {x: 120, y: 90}],
-	'shuffle_times': 10,
+	'shuffle_times': 8,
 	'bets': [10, 20, 50],
 	'win_rate': 2,
 	'use_local_storage': true,
@@ -552,6 +557,7 @@ class Game {
 	}
 
 	prepare_game() {
+		//load saved data
 		user_data = Object.assign({}, init_user_data);
 		if (!config['reset_user_data'] && config['use_local_storage']) {
 			let stored_data = localStorage.getItem(boot_data['game_id']);
@@ -581,7 +587,8 @@ class Game {
 		this.scene.add.existing(this.anim_holder);
 
 		this.game_engine.init({'anim_holder': this.anim_holder});
-		if (this.delayed_reset_game) {
+		//delayed reset on start when no money and game not created
+		if (this.delayed_reset_game) { 
 			this.game_engine.reset_game(this.delayed_reset_game);
 			this.delayed_reset_game = null;
 		}
@@ -639,7 +646,7 @@ var GameCup = new Phaser.Class({
 		this.add(this.shadow);
 		this.tweenable_parts.push(this.shadow);
 
-		if (this.no == 0) {
+		if (this.no == 0) {//only first inited cup contains ball, let it be forever
 			this.ball = new Phaser.GameObjects.Image(this.scene, 0, 10, 'common1', 'ball');
 			this.ball_shadow = new Phaser.GameObjects.Image(this.scene, 0, 65, 'common1', 'ball');
 			this.ball_shadow.setScale(1, 0.2);
@@ -648,6 +655,7 @@ var GameCup = new Phaser.Class({
 			this.ball_shadow.postFX.addBlur(0, 0, 0, 2, 0x000000, 2);
 			this.add(this.ball_shadow);
 			this.add(this.ball);
+			//ball copy will fly if player win, for more simple layers logic
 			this.fly_cont = new Phaser.GameObjects.Container(this.scene, this.ball.x, this.ball.y);
 			this.add(this.fly_cont);
 			this.ball_for_fly = new Phaser.GameObjects.Image(this.scene, 0, 0, 'common1', 'ball');
@@ -759,7 +767,7 @@ var GameCup = new Phaser.Class({
 				this.ball.visible = true;
 			}});
 		}});
-
+		//randomize parcticle frame
 		let colors = ['blue', 'green', 'yellow', 'white', 'red'];
 		let color = colors[parseInt(Math.random() * colors.length)];
 		let emit_zone = { 
@@ -788,7 +796,7 @@ var GameCup = new Phaser.Class({
 
 		let points = [];
 		points.push(new Phaser.Math.Vector2(item.x, item.y)); 
-		points.push(new Phaser.Math.Vector2(item.x - 150, item.y + 150)); 
+		points.push(new Phaser.Math.Vector2(item.x - 140, item.y + 140)); 
 		points.push(new Phaser.Math.Vector2(end_pt.x, end_pt.y)); 
 		let curve = new Phaser.Curves.Spline(points);
 		let tweenObject = { val: 0 };
@@ -842,6 +850,7 @@ var GameEngine = new Phaser.Class({
 		this.holder = new Phaser.GameObjects.Container(this.scene, 0, 0);
 		this.add(this.holder);
 
+		//stats overlay, options, bets
 		this.action_manager = new ActionManager(this.anim_holder);
 		this.action_manager.alpha = 0;
 		this.add(this.action_manager);
@@ -853,7 +862,7 @@ var GameEngine = new Phaser.Class({
 			this.cups.push(cup);
 			this.holder.add(cup);
 		}
-
+		//game locking while shuffle
 		this.overlay = new Phaser.GameObjects.Image(this.scene, 0, 0,'dark_overlay');
 		this.add(this.overlay);
 		this.overlay.alpha = 0.01;
@@ -918,6 +927,7 @@ var GameEngine = new Phaser.Class({
 				let new_pos = config['cups_pos'][i];
 				let points = [];
 				points.push(new Phaser.Math.Vector2(cup.x, cup.y)); 
+				//simple 2-points movement for middle cup
 				if (cup.current_pos == 0) {
 					points.push(new Phaser.Math.Vector2(new_pos.x + 100, new_pos.y - 70));
 				}
@@ -946,6 +956,7 @@ var GameEngine = new Phaser.Class({
 				var position = curve.getPoint(target.val);
 				item.x = position.x;
 				item.y = position.y;
+				//pseudo 3d needs
 				if (reorder && target.val >= 0.5) {
 					reorder = false;
 					this.reorder_cup_layers();
@@ -960,11 +971,10 @@ var GameEngine = new Phaser.Class({
 				}, 20);
 			}
 		});
-		setTimeout(() => {
-			utils.play_sound('woosh');
-		}, delay);
+		utils.play_sound('woosh', delay);
 	},
 
+	//new positions after shuffle
 	get_new_pos(quick = false) {
 		let cups = this.cups;
 		let pos1 = parseInt(Math.random() * cups.length);
@@ -986,7 +996,7 @@ var GameEngine = new Phaser.Class({
 		if (this.previous_cup) this.previous_cup.move_down()
 		this.previous_cup = clicked_cup;
 		this.overlay.visible = true;
-		let will_reset = this.action_manager.round_result(clicked_cup.ball);
+		let will_reset = this.action_manager.round_result(clicked_cup.ball); //if returns true - zero money(casino wins) case
 		if (clicked_cup.ball) {
 			clicked_cup.cup_over_anim();
 			clicked_cup.fly_ball(this.action_manager.get_fly_ball_pt());
@@ -994,6 +1004,7 @@ var GameEngine = new Phaser.Class({
 			utils.play_sound('round_win');
 		}
 		else {
+			//shows where is the ball before shuffle
 			for (let cup of this.cups) {
 				cup.cup_over_anim();
 				if (!cup.is_up) cup.move_up();
@@ -1009,7 +1020,8 @@ var GameEngine = new Phaser.Class({
 
 	shuffle_next(cup, delay = 0, will_reset = false) {
 		cup.move_down(()=> {
-			if (cup.ball) this.place_cups(true);
+			if (cup.ball) this.place_cups(true); //quick ball placing if player win last round
+			//just couple shuffles because of reset window appears
 			let total_shuffles = will_reset ? Math.ceil(config.shuffle_times / 4) : config.shuffle_times;
 			this.place_cups(false, total_shuffles, ()=>{
 				this.overlay.visible = false;
@@ -1132,6 +1144,7 @@ class Utils {
 	add_orientation_notifier() {
 		if (this.scene.sys.game.device.os.desktop) {}
 		else {
+			//appears at mobile devices in portrait position
 			let cont = new Phaser.GameObjects.Container(this.scene, 0, 0);
 			this.scene.add.existing(cont);
 			this.orientation_notifier = cont;
@@ -1184,7 +1197,7 @@ class Utils {
 			if (sound_obj['sound'].isPlaying) sound_obj['sound'].setVolume(this.sound_unpaused);
 		}
 	}
-
+	//part of audio manager, extendable for for different audio kind and types, ex.: music, ambience
 	play_sound(sound_name, delay = 0) {
 		let sound = null;
 		var vol = this.sound_unpaused;
@@ -1256,6 +1269,7 @@ class Utils {
 		this.emitter.emit('EVENT', {'event': 'reset_game'});
 	}
 
+	//for prize claiming anims
 	fly_items_collect(params, on_complete) {
 		let amount = params['amount'];
 		let delay = 30;			
